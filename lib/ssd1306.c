@@ -313,7 +313,7 @@ void ssd1306_draw_centered_image(ssd1306_t *ssd, const uint8_t *clock, uint8_t x
   }
 }
 
-void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)
+void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)//adicionar a amostragem do utC
 {
   if(y >= 14)
   {// Definir os limites dos fusos horários
