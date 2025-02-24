@@ -313,32 +313,38 @@ void ssd1306_draw_centered_image(ssd1306_t *ssd, const uint8_t *clock, uint8_t x
   }
 }
 
-void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)//adicionar a amostragem do utC
+void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)
 {
-  if(y >= 14)
-  {// Definir os limites dos fusos horários
-  const uint8_t fuso_pixels[] = {11, 15, 19, 24, 28, 33, 37, 42, 46,
-                                 51, 55, 60, 64, 68, 73, 77, 82, 86,
-                                 91, 95, 100, 104, 109, 113, 117};
-  const uint8_t num_fusos = 24;
-
-  // Encontrar o fuso correspondente ao valor de x
-  uint8_t fuso_index = 0;
-  for (uint8_t i = 0; i < num_fusos; ++i)
+  if (y >= 14)
   {
-    if (x >= fuso_pixels[i] && x < fuso_pixels[i + 1])
-    {
-      fuso_index = i;
-      break;
+    // Definir os limites dos fusos horários
+    const uint8_t fuso_pixels[] = {11, 15, 19, 24, 28, 33, 37, 42, 46,
+                                    51, 55, 60, 64, 68, 73, 77, 82, 86,
+                                    91, 95, 100, 104, 109, 113, 117, 119}; 
+    const uint8_t num_fusos = 24;
+
+    // Limitar o valor de x a 116 (com um pixel de folga)
+    if (x > 116) {
+      x = 116;
     }
+
+    // Encontrar o fuso correspondente ao valor de x
+    uint8_t fuso_index = 0;
+    for (uint8_t i = 0; i < num_fusos; ++i) // A comparação vai até num_fusos - 1 para evitar acessar o índice fuso_pixels[i + 1] fora dos limites
+    {
+      if (x >= fuso_pixels[i] && x < fuso_pixels[i + 1])
+      {
+        fuso_index = i;
+        break;
+      }
+    }
+    // Definir os limites do quadrado
+    uint8_t left = fuso_pixels[fuso_index];
+    uint8_t width = fuso_pixels[fuso_index + 1] - fuso_pixels[fuso_index];
+    uint8_t top = 14;       // Ajuste a posição vertical conforme necessário
+    uint8_t height = 50;    // Quadrado (largura = altura)
+
+    // Desenhar o quadrado usando a função ssd1306_rect
+    ssd1306_rect(ssd, top, left, width, height, false, false);
   }
-
-  // Definir os limites do quadrado
-  uint8_t left = fuso_pixels[fuso_index];
-  uint8_t width = fuso_pixels[fuso_index + 1] - fuso_pixels[fuso_index];
-  uint8_t top = 14;       // Ajuste a posição vertical conforme necessário
-  uint8_t height = 50; // Quadrado (largura = altura)
-
-  // Desenhar o quadrado usando a função ssd1306_rect
-  ssd1306_rect(ssd, top, left, width, height, false, false);}
 }
