@@ -20,3 +20,4 @@ Criar um relógio universal que possa ser ajustado para qualquer fuso horário d
 - **Botões físicos** (Entrada GPIO)  
 
 ## Link do video de apresentação:
+https://youtu.be/syjVBWtrnEY
