@@ -170,7 +170,7 @@ void ssd1306_vline(ssd1306_t *ssd, uint8_t x, uint8_t y0, uint8_t y1, bool value
     ssd1306_pixel(ssd, x, y, value);
 }
 
-// Função para desenhar um caractere
+// Função para desenhar um caractere na tela
 void ssd1306_draw_char(ssd1306_t *ssd, char c, uint8_t x, uint8_t y)
 {
   uint16_t index = 0;
@@ -189,11 +189,11 @@ void ssd1306_draw_char(ssd1306_t *ssd, char c, uint8_t x, uint8_t y)
   }
   else if (c == ':') 
   {
-    index = (('z' - 'a' + 37) + 1) * 8; // Logo após 'z'
+    index = (('z' - 'a' + 37) + 1) * 8; // Símbolo ':'
   }
   else if (c == '-') 
   {
-    index = (('z' - 'a' + 37) + 2) * 8; // Logo após ':'
+    index = (('z' - 'a' + 37) + 2) * 8; // Símbolo '-'
   }
 
   for (uint8_t i = 0; i < 8; ++i)
@@ -206,8 +206,7 @@ void ssd1306_draw_char(ssd1306_t *ssd, char c, uint8_t x, uint8_t y)
   }
 }
 
-
-// Função para desenhar uma string
+// Função para desenhar uma string na tela
 void ssd1306_draw_string(ssd1306_t *ssd, const char *str, uint8_t x, uint8_t y)
 {
   while (*str)
@@ -226,46 +225,24 @@ void ssd1306_draw_string(ssd1306_t *ssd, const char *str, uint8_t x, uint8_t y)
   }
 }
 
-void ssd1306_animated_border(ssd1306_t *ssd, uint8_t cor)
-{
-  static uint8_t frame = 0; // Alterna entre os dois frames
-
-  // Limpa a área da borda sem afetar o resto da tela
-  ssd1306_rect(ssd, 2, 2, 124, 60, !cor, !cor); // Apaga borda anterior
-
-  if (frame == 0)
-  {
-    // Frame 0: Borda pulsante (variação de espessura)
-    uint8_t offset = 0; // Tamanho fixo da borda
-    ssd1306_rect(ssd, 3 + offset, 3 + offset, 122 - 2 * offset, 60 - 2 * offset, cor, !cor);
-  }
-  else
-  {
-    // Frame 1: Borda dupla alternante
-    ssd1306_rect(ssd, 3, 3, 122, 60, cor, !cor);
-    ssd1306_rect(ssd, 5, 5, 118, 56, cor, !cor);
-  }
-
-  frame = !frame; // Alterna entre os dois frames
-}
-
+// Função para mapear a coordenada x de entrada para a coordenada x do display
 uint8_t map_x_to_display(uint16_t input_x)
 {
   if (input_x > 4095)
-    input_x = 4095;                   // Limita o valor máximo
+    input_x = 4095; // Limita o valor máximo
   return (input_x * 107) / 4095 + 10; // Mapeia input_x (0-4095) para x (10-117)
 }
 
+// Função para mapear a coordenada y de entrada para a coordenada y do display
 uint8_t map_y_to_display(uint16_t input_y)
 {
   if (input_y > 4095)
-    input_y = 4095;  // Limita o valor máximo
+    input_y = 4095; // Limita o valor máximo
 
   return 50 - ((input_y * 35) / 4095); // Mapeia input_y (0-4095) para y (15-50)
 }
 
-
-
+// Função para desenhar um mapa mundial na tela
 void ssd1306_draw_world_map(ssd1306_t *ssd, const uint8_t *bitmap)
 {
   for (uint8_t y = 0; y < 64; ++y)
@@ -281,9 +258,9 @@ void ssd1306_draw_world_map(ssd1306_t *ssd, const uint8_t *bitmap)
   }
 }
 
+// Função para desenhar uma cruz na tela
 void ssd1306_cross(ssd1306_t *ssd, uint8_t x, uint8_t y, uint8_t length, bool value)
 {
-
   ssd1306_hline(ssd, x - length / 2, x + length / 2, y, value);
   ssd1306_hline(ssd, x - length / 2, x + length / 2, y + 1, value);
 
@@ -291,7 +268,8 @@ void ssd1306_cross(ssd1306_t *ssd, uint8_t x, uint8_t y, uint8_t length, bool va
   ssd1306_vline(ssd, x + 1, y - length / 2, y + length / 2, value);
 }
 
-bool ssd1306_get_pixel(const uint8_t *bitmap, uint8_t x, uint8_t y) // descobre se o pixel()
+// Função para obter o valor de um pixel do bitmap
+bool ssd1306_get_pixel(const uint8_t *bitmap, uint8_t x, uint8_t y)
 {
   if (x >= 128 || y >= 64)
   {
@@ -303,27 +281,26 @@ bool ssd1306_get_pixel(const uint8_t *bitmap, uint8_t x, uint8_t y) // descobre 
   return (bitmap[byte_index] >> (7 - bit_index)) & 1;
 }
 
+// Função para desenhar uma imagem centralizada na tela
 void ssd1306_draw_centered_image(ssd1306_t *ssd, const uint8_t *clock, uint8_t x_offset, uint8_t y_offset)
 {
-  {
-    for (int y = 0; y < 48; y++)
-    { // Linhas (altura da imagem)
-      for (int x = 0; x < 48; x++)
-      { // Colunas (largura da imagem)
-        // Calcula o byte e o bit correspondente ao pixel
-        uint8_t byte_index = y * 6 + (x / 8);                    // Cada linha tem 6 bytes (48 pixels)
-        uint8_t bit_index = 7 - (x % 8);                         // Inverte a ordem dos bits dentro do byte
-        uint8_t pixel = (clock[byte_index] >> bit_index) & 0x01; // Extrai o bit
+  for (int y = 0; y < 48; y++)
+  { // Linhas (altura da imagem)
+    for (int x = 0; x < 48; x++)
+    { // Colunas (largura da imagem)
+      // Calcula o byte e o bit correspondente ao pixel
+      uint8_t byte_index = y * 6 + (x / 8);                    // Cada linha tem 6 bytes (48 pixels)
+      uint8_t bit_index = 7 - (x % 8);                         // Inverte a ordem dos bits dentro do byte
+      uint8_t pixel = (clock[byte_index] >> bit_index) & 0x01; // Extrai o bit
 
-        // Desenha o pixel na posição correta
-        ssd1306_pixel(ssd, x_offset + x, y_offset + y, pixel);
-      }
+      // Desenha o pixel na posição correta
+      ssd1306_pixel(ssd, x_offset + x, y_offset + y, pixel);
     }
   }
 }
 
-
-uint select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y) // Adicionar a amostragem do UTC
+// Função para selecionar o fuso horário com base nas coordenadas x e y
+uint select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)
 {
   if (y >= 14)
   {
@@ -340,7 +317,7 @@ uint select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y) // Adicionar a amostragem
 
     // Encontrar o fuso correspondente ao valor de x
     uint8_t fuso_index = 0;
-    for (uint8_t i = 0; i < num_fusos + 1; ++i) // A comparação vai até num_fusos - 1 para evitar acessar o índice fuso_pixels[i + 1] fora dos limites
+    for (uint8_t i = 0; i < num_fusos + 1; ++i)
     {
       if (x >= fuso_pixels[i] && x < fuso_pixels[i + 1])
       {
@@ -359,9 +336,9 @@ uint select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y) // Adicionar a amostragem
     
     char buffer[10]; // Buffer para armazenar o número convertido
     // Convertendo o número inteiro "i" para uma string
-    if(fuso_index - 12 >= 0)//se o fuso for maior que 12
+    if(fuso_index - 12 >= 0) // Se o fuso for maior que 12
       sprintf(buffer, "%d", fuso_index - 12); // Converte "fuso_index" para string
-    else//se for menor que 12
+    else // Se for menor que 12
       sprintf(buffer, "-%d", 12 - fuso_index);
 
     // Agora você pode usar a string com "fuso_index" em ssd1306_draw_string
@@ -370,4 +347,3 @@ uint select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y) // Adicionar a amostragem
     return fuso_index;
   }
 }
-
