@@ -20,6 +20,34 @@
 #define I2C_SCL 15
 #define endereco 0x3C // Endereço do display OLED
 
+const char *fusos_referencias[] = {
+    "Ilha Baker",          // UTC-12
+    "Midway",              // UTC-11
+    "Havai",               // UTC-10
+    "Alasca",              // UTC-9
+    "Los Angeles",         // UTC-8
+    "Denver",              // UTC-7
+    "Cidade do Mexico",    // UTC-6
+    "Nova York",           // UTC-5
+    "Caracas",             // UTC-4
+    "Buenos Aires",        // UTC-3
+    "Ilha Georgia do Sul", // UTC-2
+    "Acores",              // UTC-1
+    "Londres",             // UTC 0 (Greenwich)
+    "Paris",               // UTC+1
+    "Cairo",               // UTC+2
+    "Moscou",              // UTC+3
+    "Dubai",               // UTC+4
+    "Islamabad",           // UTC+5
+    "Dhaka",               // UTC+6
+    "Bangkok",             // UTC+7
+    "Pequim",              // UTC+8
+    "Toquio",              // UTC+9
+    "Sydney",              // UTC+10
+    "Noumea",              // UTC+11
+    "Auckland"             // UTC+12
+};
+
 float get_duty_cycle(uint16_t value) // função que calcula o duty cycle
 {
     if (value > 2150)
@@ -60,34 +88,63 @@ void buttons_init()
     gpio_pull_up(button_b);          // Habilita o resistor pull-up no botão B
 }
 
-static volatile uint hora_num, minutos_num;
-static char hora_char[3], minutos_char[3];
+volatile int hora_num2, minutos_num2;
+volatile char hora_char2[3], minutos_char2[3];
 
 void get_hora()
 {
+    char hora_char[3] = {0};
+    char minutos_char[3] = {0};
+    int hora_num = 0, minutos_num = 0;
+
     while (true)
     {
-        printf("Digite o valor das horas: \n");
+        printf("Digite o valor das horas (00-23): \n");
         for (int c = 0; c < 2; c++)
         {
             hora_char[c] = getchar();
-            if (hora_char[c] < '0' || hora_char[c] > '9') // se não for um numero
+            if (hora_char[c] < '0' || hora_char[c] > '9')
             {
-                printf("valor invalido digite novamente");
-                c--;
+                printf("Valor inválido. Digite novamente.\n");
+                while (getchar() != '\n'); // Limpa buffer
+                c = -1; // Reinicia a leitura
             }
-            hora_num = atoi(hora_char);
-            printf("%d", hora_num);
         }
-
-        printf("Digite o valor dos minutos: \n");
+        //getchar(); // Captura o '\n' após a entrada
+        hora_num = atoi(hora_char);
+        
+        printf("Digite o valor dos minutos (00-59): \n");
         for (int c = 0; c < 2; c++)
         {
             minutos_char[c] = getchar();
-            if (minutos_char[c] >= 0 && minutos_char[c] <= 9)
-                minutos_num = atoi(minutos_char);
+            if (minutos_char[c] < '0' || minutos_char[c] > '9')
+            {
+                printf("Valor inválido. Digite novamente.\n");
+                while (getchar() != '\n'); // Limpa buffer
+                c = -1; // Reinicia a leitura
+            }
         }
-        if (hora_num <= 24 && minutos_num <= 60)
-            printf("Hora definida: %s:%s", hora_char, minutos_char);
+        //getchar(); // Captura o '\n' após a entrada
+        minutos_num = atoi(minutos_char);
+        
+        if (hora_num >= 0 && hora_num <= 23 && minutos_num >= 0 && minutos_num <= 59)
+        {
+            printf("Hora definida: %02d:%02d\n", hora_num, minutos_num);
+            for(int c= 0; c<2;c++)
+            {
+                hora_char2[c] = hora_char[c];
+            }
+            hora_num2 = hora_num;
+            for(int c= 0; c<2;c++)
+            {
+                minutos_char2[c] = minutos_char[c];
+            }
+            minutos_num2 = minutos_num;
+            break;
+        }
+        else
+        {
+            printf("Valores inválidos. Digite novamente.\n");
+        }
     }
 }

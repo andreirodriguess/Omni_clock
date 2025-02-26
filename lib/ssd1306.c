@@ -1,5 +1,6 @@
 #include "ssd1306.h"
 #include "font.h"
+#include "stdio.h"
 
 void ssd1306_init(ssd1306_t *ssd, uint8_t width, uint8_t height, bool external_vcc, uint8_t address, i2c_inst_t *i2c)
 {
@@ -186,9 +187,13 @@ void ssd1306_draw_char(ssd1306_t *ssd, char c, uint8_t x, uint8_t y)
   {
     index = (c - '0' + 1) * 8; // Números
   }
-  else if (c == ':') // Adicionando suporte ao caractere ':'
+  else if (c == ':') 
   {
     index = (('z' - 'a' + 37) + 1) * 8; // Logo após 'z'
+  }
+  else if (c == '-') 
+  {
+    index = (('z' - 'a' + 37) + 2) * 8; // Logo após ':'
   }
 
   for (uint8_t i = 0; i < 8; ++i)
@@ -200,6 +205,7 @@ void ssd1306_draw_char(ssd1306_t *ssd, char c, uint8_t x, uint8_t y)
     }
   }
 }
+
 
 // Função para desenhar uma string
 void ssd1306_draw_string(ssd1306_t *ssd, const char *str, uint8_t x, uint8_t y)
@@ -253,9 +259,12 @@ uint8_t map_x_to_display(uint16_t input_x)
 uint8_t map_y_to_display(uint16_t input_y)
 {
   if (input_y > 4095)
-    input_y = 4095;                    // Limita o valor máximo
-  return 50 - ((input_y * 42) / 4095); // Mapeia input_y (0-4095) para y (8-50)
+    input_y = 4095;  // Limita o valor máximo
+
+  return 50 - ((input_y * 35) / 4095); // Mapeia input_y (0-4095) para y (15-50)
 }
+
+
 
 void ssd1306_draw_world_map(ssd1306_t *ssd, const uint8_t *bitmap)
 {
@@ -313,12 +322,13 @@ void ssd1306_draw_centered_image(ssd1306_t *ssd, const uint8_t *clock, uint8_t x
   }
 }
 
-void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)
+
+uint select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y) // Adicionar a amostragem do UTC
 {
   if (y >= 14)
   {
     // Definir os limites dos fusos horários
-    const uint8_t fuso_pixels[] = {11, 15, 19, 24, 28, 33, 37, 42, 46,
+    const uint8_t fuso_pixels[] = {6, 11, 15, 19, 24, 28, 33, 37, 42, 46,
                                     51, 55, 60, 64, 68, 73, 77, 82, 86,
                                     91, 95, 100, 104, 109, 113, 117, 119}; 
     const uint8_t num_fusos = 24;
@@ -330,7 +340,7 @@ void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)
 
     // Encontrar o fuso correspondente ao valor de x
     uint8_t fuso_index = 0;
-    for (uint8_t i = 0; i < num_fusos; ++i) // A comparação vai até num_fusos - 1 para evitar acessar o índice fuso_pixels[i + 1] fora dos limites
+    for (uint8_t i = 0; i < num_fusos + 1; ++i) // A comparação vai até num_fusos - 1 para evitar acessar o índice fuso_pixels[i + 1] fora dos limites
     {
       if (x >= fuso_pixels[i] && x < fuso_pixels[i + 1])
       {
@@ -346,5 +356,18 @@ void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y)
 
     // Desenhar o quadrado usando a função ssd1306_rect
     ssd1306_rect(ssd, top, left, width, height, false, false);
+    
+    char buffer[10]; // Buffer para armazenar o número convertido
+    // Convertendo o número inteiro "i" para uma string
+    if(fuso_index - 12 >= 0)//se o fuso for maior que 12
+      sprintf(buffer, "%d", fuso_index - 12); // Converte "fuso_index" para string
+    else//se for menor que 12
+      sprintf(buffer, "-%d", 12 - fuso_index);
+
+    // Agora você pode usar a string com "fuso_index" em ssd1306_draw_string
+    ssd1306_draw_string(ssd, "UTC", 0, 40);
+    ssd1306_draw_string(ssd, buffer, 0, 51);
+    return fuso_index;
   }
 }
+

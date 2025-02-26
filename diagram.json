@@ -68,6 +68,13 @@
       "top": -51.4,
       "left": -153.6,
       "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": -3.4,
+      "left": -153.6,
+      "attrs": { "color": "green", "xray": "1" }
     }
   ],
   "connections": [

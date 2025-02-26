@@ -54,4 +54,4 @@ void ssd1306_draw_world_map(ssd1306_t *ssd, const uint8_t *bitmap);
 void ssd1306_cross(ssd1306_t *ssd, uint8_t x, uint8_t y, uint8_t length, bool value);
 bool ssd1306_get_pixel(const uint8_t *bitmap, uint8_t x, uint8_t y);//retorna se o pixel(x,y) está ligado ou desligado
 void ssd1306_draw_centered_image(ssd1306_t *ssd, const uint8_t *clock, uint8_t x_offset, uint8_t y_offset);
-void select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y);
+uint select_fuso(ssd1306_t *ssd, uint8_t x, uint8_t y);
